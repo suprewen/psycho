@@ -220,11 +220,13 @@ func queryNotifications(uID int) []common.Notification {
 // 查询咨询记录
 func queryCounselingRecords(userType int, id int) []common.RecordForm {
 	var records []common.RecordForm
-	var queryStr = "select id, c_id, method, times, name, age, gender, phone, contact_phone, contact_name, contact_rel, `desc`, status, create_time, start_time, location, cancel_reason1, cancel_reason2, rating_score, rating_text, letter, price from counseling_record where"
-	if userType == 1 {
-		queryStr = fmt.Sprintf("%v c_id=%v", queryStr, id)
-	} else {
-		queryStr = fmt.Sprintf("%v u_id=%v", queryStr, id)
+	var queryStr = "select id, c_id, method, times, name, age, gender, phone, contact_phone, contact_name, contact_rel, `desc`, status, create_time, start_time, location, cancel_reason1, cancel_reason2, rating_score, rating_text, letter, price from counseling_record "
+	if id != -1 {
+		if userType == 1 {
+			queryStr = fmt.Sprintf("%v where c_id=%v", queryStr, id)
+		} else {
+			queryStr = fmt.Sprintf("%v where u_id=%v", queryStr, id)
+		}
 	}
 
 	queryStr += " ORDER BY create_time DESC"
@@ -634,4 +636,60 @@ func queryCounselorDetail(cID int) []common.CounselorDetail {
 	rows.Close()
 
 	return details
+}
+
+// 用户列表
+func queryUsers(p pagination) (pagination, userList) {
+	var queryCountStr = "select count(*) from user"
+	var queryStr = "select id, c_id, username, phone, email, type, update_time, create_time from user"
+	var firstRecordIndex = (p.PageNum - 1) * p.PageSize
+	// db op
+	count := utils.QueryDBRow(queryCountStr)
+	var pp = pagination{PageNum: p.PageNum, PageSize: p.PageSize, Total: count}
+
+	// empty
+	if count == 0 || count <= firstRecordIndex {
+		var emptyUser = []common.User{}
+		return pp, emptyUser
+	}
+	queryStr = queryStr + " limit " + strconv.Itoa(firstRecordIndex) + "," + strconv.Itoa(p.PageSize)
+
+	var cl userList
+	rows := utils.QueryDB(queryStr)
+	for rows.Next() {
+		var c common.User
+		rows.Scan(&c.ID, &c.CID, &c.UserName, &c.Phone, &c.Email, &c.Type, &c.UpdateTime, &c.CreateTime)
+		cl = append(cl, c)
+	}
+	rows.Close()
+	return pp, cl
+}
+
+// 文章列表
+func queryArticle(p pagination) (pagination, articleList1) {
+	var queryCountStr = "select count(*) from article"
+	var queryStr = "select id, c_id, cover, title, content, excerpt, is_draft, category, tags, author_name," +
+		" update_time, create_time from article"
+	var firstRecordIndex = (p.PageNum - 1) * p.PageSize
+	// db op
+	count := utils.QueryDBRow(queryCountStr)
+	var pp = pagination{PageNum: p.PageNum, PageSize: p.PageSize, Total: count}
+
+	// empty
+	if count == 0 || count <= firstRecordIndex {
+		var emptyUser = []common.Article{}
+		return pp, emptyUser
+	}
+	queryStr = queryStr + " limit " + strconv.Itoa(firstRecordIndex) + "," + strconv.Itoa(p.PageSize)
+
+	var cl articleList1
+	rows := utils.QueryDB(queryStr)
+	for rows.Next() {
+		var c common.Article
+		rows.Scan(&c.ID, &c.CID, &c.Cover, &c.Title, &c.Content, &c.Excerpt, &c.IsDraft, &c.Category, &c.Tags,
+			&c.AuthorName, &c.UpdateTime, &c.CreateTime)
+		cl = append(cl, c)
+	}
+	rows.Close()
+	return pp, cl
 }

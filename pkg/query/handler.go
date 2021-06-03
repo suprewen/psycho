@@ -127,13 +127,23 @@ func CounselingRecordHandler(w http.ResponseWriter, r *http.Request) {
 	var userType int
 	var resp common.Response
 
+	rid, _ := strconv.Atoi(r.URL.Query().Get("id"))
+	if rid == -1 {
+		records := queryCounselingRecords(userType, rid)
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data = records
+		resJSON, _ := json.Marshal(resp)
+		fmt.Fprintf(w, string(resJSON))
+		return
+	}
+
 	if uid, userType = common.IsUserLogin(r); uid == -1 {
 		http.Error(w, "Not Loggin", http.StatusUnauthorized)
 		return
 	}
 
 	// query by id
-	rid, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	if rid != 0 {
 		var uuid int
 		var record *(common.RecordForm)
@@ -324,4 +334,70 @@ func PopularListHandler(w http.ResponseWriter, r *http.Request) {
 
 	resJSON, _ := json.Marshal(resp)
 	fmt.Fprintln(w, string(resJSON))
+}
+
+// UserListHandler return the User list
+func UserListHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		// pagination
+		pageNum, err := strconv.Atoi(r.URL.Query().Get("pageNum"))
+		pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+		if err != nil {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+		var p = pagination{
+			PageNum:  pageNum,
+			PageSize: pageSize,
+		}
+
+		var pp pagination
+		var users []common.User
+		pp, users = queryUsers(p)
+
+		var resp common.Response
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data = userRespData{
+			pagination: pp,
+			List:       users,
+		}
+
+		resJSON, _ := json.Marshal(resp)
+		fmt.Fprintf(w, string(resJSON))
+	} else {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	}
+}
+
+// ArticleListHandler return the Article list
+func ArticleListHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		// pagination
+		pageNum, err := strconv.Atoi(r.URL.Query().Get("pageNum"))
+		pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+		if err != nil {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+		var p = pagination{
+			PageNum:  pageNum,
+			PageSize: pageSize,
+		}
+
+		var pp pagination
+		var articles []common.Article
+		pp, articles = queryArticle(p)
+
+		var resp common.Response
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data = articleList{
+			pagination: pp,
+			List:       articles,
+		}
+
+		resJSON, _ := json.Marshal(resp)
+		fmt.Fprintf(w, string(resJSON))
+	} else {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	}
 }

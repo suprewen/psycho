@@ -100,7 +100,9 @@ type User struct {
 	UserName   string `json:"userName"`
 	Phone      string `json:"phone"`
 	Email      string `json:"email"`
+	Type       string `json:"type"`
 	CreateTime string `json:"createTime"`
+	UpdateTime string `json:"update_time"`
 }
 
 // CounselorForm 咨询师注册，更新信息
@@ -146,6 +148,8 @@ type Article struct {
 	ReadCount  int              `json:"readCount"`
 	StarCount  int              `json:"starCount"`
 	LikeCount  int              `json:"likeCount"`
+	CreateTime string           `json:"createTime"`
+	UpdateTime string           `json:"update_time"`
 }
 
 // ArticleComment 文章评论

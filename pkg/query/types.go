@@ -24,6 +24,11 @@ type counselorRespData struct {
 	List []common.Counselor `json:"list"`
 }
 
+type userRespData struct {
+	pagination
+	List []common.User `json:"list"`
+}
+
 type articleList struct {
 	pagination
 	List []common.Article `json:"list"`
@@ -36,5 +41,8 @@ type articleQueryArgs struct {
 
 type askList []common.AskItem
 type counselorList []common.Counselor
+
+type userList []common.User
+type articleList1 []common.Article
 
 type fuzzyList interface{}
