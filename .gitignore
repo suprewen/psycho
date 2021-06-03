@@ -1,6 +1,7 @@
 ## main exec file
-/cmd/app/app
-app
+# /cmd/app/app
+# app
+main
 
 ## debug 
 /cmd/app/debug
