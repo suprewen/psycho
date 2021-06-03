@@ -1,0 +1,6 @@
+## main exec file
+/cmd/app/app
+app
+
+## debug 
+/cmd/app/debug
